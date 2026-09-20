@@ -25,13 +25,30 @@ de consulta regulatoria da Anvisa), tom anti-hype IA.med, publicada sob
 - Tom anti-hype, pt-BR com acentos, sem travessao, sem emoji no conteudo.
 
 ## Sub-passos
-1. [ ] Scaffold (config, layout, componentes, index, README, assets)
-2. [ ] npm install + npm run build (verificar de verdade)
-3. [ ] npm run dev + preview no browser (validar visual)
-4. [ ] Gerar og-image.png (1200x630) real
-5. [ ] git init main + commit
-6. [ ] gh repo create anvisa-mcp-landing --public + push
-7. [ ] Deploy: deixar preparado, NAO executar
+1. [x] Scaffold (config, layout, componentes, index, README, assets)
+2. [x] npm install + npm run build (build limpo, 1 pagina)
+3. [x] npm run dev + preview no browser (6 secoes validadas visualmente)
+4. [x] Gerar og-image.png (1200x630, via Chrome headless a partir de og.svg)
+5. [x] git init main + commit
+6. [x] gh repo create anvisa-mcp-landing --public + push -> github.com/fabianofilho/anvisa-mcp-landing
+7. [x] Deploy: preparado (site+base no astro.config), NAO executado
+
+## Estado final (feito nesta sessao)
+- Repo publico no ar: https://github.com/fabianofilho/anvisa-mcp-landing (main).
+- Repo do projeto anvisa-mcp existe mas e PRIVADO -> botao "Ver no GitHub" 404 pra
+  visitante sem acesso ate ser tornado publico. Decisao do usuario.
+- Deploy Vercel NAO feito. Ao configurar: apontar dominio pra servir o dist sob
+  /anvisa (mcp.iamed.cc/anvisa) e conferir que /anvisa/og-image.png e /anvisa/
+  favicon.svg resolvem.
+- npm audit acusou vulnerabilidades em deps transitivas (dev/build, Astro/Vite);
+  nao rodei `audit fix --force` (breaking). Reavaliar em upgrade do Astro.
+- Exemplos de retorno das tools sao ILUSTRATIVOS; reconciliar com o anvisa-mcp
+  real antes de divulgar a pagina.
+
+## Proximo passo (quando for publicar de verdade)
+1. Tornar anvisa-mcp publico OU repensar o CTA se ficar privado.
+2. Ajustar exemplos das tools ao esquema real do anvisa-mcp.
+3. Deploy Vercel + apontar mcp.iamed.cc/anvisa.
 
 ## Fora de escopo (e por que)
 - Criar o repo `anvisa-mcp` em si (usuario nao pediu; e outro projeto).
