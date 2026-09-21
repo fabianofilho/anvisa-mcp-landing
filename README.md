@@ -38,13 +38,11 @@ este repositório.
 
 ## Notas
 
-- O repositório do projeto `anvisa-mcp` existe, mas é privado. Os links de
-  GitHub vão falhar para visitantes sem acesso até o repositório ser tornado
-  público.
+- O repositório do projeto `anvisa-mcp` é público, então os links de GitHub funcionam.
 - Os exemplos de retorno das ferramentas na página são ilustrativos; o esquema
   final segue a implementação do `anvisa-mcp`.
 - A classificação de SaMD com IA é heurística, não um fato regulatório oficial.
 
 ## Licença
 
-MIT.
+Apache-2.0.
