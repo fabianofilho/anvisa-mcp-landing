@@ -2,19 +2,25 @@
 import CodeBlock from "./CodeBlock.astro";
 import { GITHUB_URL } from "../consts";
 
-const passos = `# 1. clonar o repositório
+const passos = `# 1. clonar e instalar (Python 3.12+ e uv)
 git clone ${GITHUB_URL}.git
 cd anvisa-mcp
+uv sync
+cp .env.example .env   # QWEN_ENDPOINT e QWEN_MODEL do seu LLM local
 
-# 2. instalar as dependências (ver README do projeto)
-#    ex.: uv sync   (ou pip install -e .)
+# 2. conferir o LLM e baixar os dados da Anvisa
+uv run anvisa-cli llm      # deve imprimir a resposta do modelo
+uv run anvisa-cli sync     # ~1 min: baixa os dois CSVs
+uv run anvisa-cli schema   # contagens da base
 
-# 3. configurar o ambiente
-cp .env.example .env
-#    aponte o .env para o seu modelo de linguagem local
+# 3. classificar os dispositivos e gravar os vereditos
+uv run anvisa-cli classificar --dias 365`;
 
-# 4. rodar o servidor MCP
-#    ver o comando exato no README do projeto`;
+const claudeCode = `claude mcp add anvisa --scope user \\
+  -e DUCKDB_PATH=/caminho/para/anvisa-mcp/data/anvisa.duckdb \\
+  -e QWEN_ENDPOINT=http://127.0.0.1:8080/v1 \\
+  -e QWEN_MODEL=local-model \\
+  -- uv --directory /caminho/para/anvisa-mcp run anvisa-mcp`;
 ---
 
 <section id="como-rodar" class="border-b border-neutral-900">
@@ -23,20 +29,40 @@ cp .env.example .env
       Como rodar
     </p>
     <h2 class="mt-3 text-2xl font-bold text-white sm:text-3xl">
-      Roda na sua máquina
+      Instalação local
     </h2>
     <p class="mt-3 max-w-2xl text-neutral-400">
-      Não é um serviço hospedado. Você clona o repositório, aponta para o seu
-      modelo local e o servidor MCP roda ali, no seu computador.
+      Se preferir não depender do conector hospedado, clone o repositório, aponte
+      para o seu LLM (llama.cpp, Ollama ou LM Studio, com API compatível com a da
+      OpenAI) e monte a sua base. O repositório não traz a base pronta.
     </p>
 
     <div class="mt-8">
       <CodeBlock
         code={passos}
         lang="bash"
-        caption="Os comandos exatos de instalar e rodar seguem o README do projeto."
+        caption="O sync é idempotente. Para rodar todo dia, use o timer systemd de deploy/ ou o agendador que preferir."
       />
     </div>
+
+    <div class="mt-6">
+      <CodeBlock
+        code={claudeCode}
+        lang="bash"
+        caption="Ligando ao Claude Code. Os caminhos precisam ser absolutos."
+      />
+    </div>
+
+    <p class="mt-6 max-w-2xl text-sm leading-relaxed text-neutral-400">
+      <code class="font-mono text-neutral-300">classificar</code> e
+      <code class="font-mono text-neutral-300">sync --classificar</code> saem com código 1
+      quando os vereditos não puderam ser gravados, em vez de dar a classificação por
+      feita. Com um conector lendo a mesma base, use sempre
+      <code class="font-mono text-neutral-300">--publicar</code>: a CLI monta a base ao
+      lado e troca por rename. <code class="font-mono text-neutral-300">--reclassificar</code>
+      refaz uma vez os vereditos gravados antes da checagem de evidência, inclusive os
+      que estão fora da janela e do filtro de software.
+    </p>
 
     <div class="mt-6 flex gap-3 rounded-xl border border-emerald/25 bg-emerald/5 p-4">
       <svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -44,9 +70,10 @@ cp .env.example .env
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
       </svg>
       <p class="text-sm leading-relaxed text-neutral-300">
-        No modo local, tudo acontece na sua máquina: o servidor consulta as bases
-        públicas da Anvisa e conversa com o seu modelo, sem enviar seus dados a
-        terceiros. No modo conector, quem hospeda o endpoint HTTP é você.
+        No modo local, só saem da máquina as requisições a dados.anvisa.gov.br para
+        baixar os CSVs públicos. Os termos consultados ficam na base local, e o texto
+        dos registros vai só para o LLM que você configurou. Sem telemetria. Pelo
+        conector hospedado, os termos de cada consulta chegam ao servidor do autor.
       </p>
     </div>
   </div>

@@ -1,38 +1,99 @@
 ---
 import CodeBlock from "./CodeBlock.astro";
+import { CONNECTOR_URL } from "../consts";
 
-const connector = `# expor como conector HTTP (o Claude chama pela rede)
-TRANSPORTE=streamable-http HTTP_HOST=0.0.0.0 HTTP_PORTA=8000 uv run anvisa-mcp`;
+const claudeCode = `claude mcp add --transport http anvisa ${CONNECTOR_URL}`;
+
+const avisos = [
+  {
+    titulo: "Dados públicos da Anvisa, sem garantia",
+    texto: "A base é montada a partir dos arquivos abertos da agência, uma vez por dia de madrugada. Cada resposta traz coletado_em. Não é fonte oficial e não substitui o portal da Anvisa.",
+  },
+  {
+    titulo: "Sem garantia de disponibilidade",
+    texto: "Roda numa máquina pessoal atrás do Tailscale Funnel. Pode sair do ar, reiniciar ou mudar de endereço sem aviso. Se você depende dele, rode o seu.",
+  },
+  {
+    titulo: "Sem autenticação, com limites",
+    texto: "600 requisições por minuto por origem e 1.200 no total; acima disso, HTTP 429 por um minuto. limite vai de 1 a 200 nas duas tools e dias de 1 a 3650; fora da faixa, a chamada é recusada.",
+  },
+  {
+    titulo: "Somente leitura, sem LLM na hora",
+    texto: "O conector não classifica sob demanda: serve os vereditos que a coleta diária gravou, que cobrem os dispositivos dos últimos 10 anos que passam no filtro de software. O resto vem como nao_classificado.",
+  },
+  {
+    titulo: "O que você consulta passa por lá",
+    texto: "Os termos e parâmetros de cada chamada chegam ao servidor do autor. O código não registra os termos nem mantém log de acesso; só a origem de quem passa do limite de taxa.",
+  },
+];
+
+const connector = `# expor a sua própria instância como conector HTTP (escuta só no loopback)
+TRANSPORTE=streamable-http HTTP_HOST=127.0.0.1 HTTP_PORTA=8000 uv run anvisa-mcp
+
+# atrás de túnel ou proxy com TLS, declare o nome público (senão responde 421)
+HTTP_HOSTS_PUBLICOS=mcp.exemplo.ts.net
+
+# a coleta roda fora do servidor e é o único momento em que o LLM entra
+uv run anvisa-cli sync --publicar --classificar --dias-classificacao 3650`;
 ---
 
 <section id="modos" class="border-b border-neutral-900">
   <div class="mx-auto max-w-4xl px-6 py-20">
-    <p class="text-sm font-semibold uppercase tracking-wider text-emerald">Dois modos</p>
+    <p class="text-sm font-semibold uppercase tracking-wider text-emerald">Dois jeitos de usar</p>
     <h2 class="mt-3 text-2xl font-bold text-white sm:text-3xl">
-      Local, ou como conector do Claude
+      Pelo conector hospedado, ou na sua máquina
     </h2>
     <p class="mt-3 max-w-2xl text-neutral-400">
-      O mesmo servidor fala nos dois transportes. O LLM que classifica é um endpoint
-      compatível com a API da OpenAI, seu, local ou de um provedor.
+      O mesmo servidor fala stdio (local) e streamable-http (conector). Em nenhum dos
+      dois ele grava na base: quem escreve é a CLI.
     </p>
 
-    <div class="mt-10 grid gap-6 lg:grid-cols-2 lg:items-start">
+    <article id="conector" class="mt-10 rounded-xl border border-emerald/25 bg-ink-800 p-5">
+      <h3 class="font-mono text-base font-semibold text-emerald">Conector hospedado</h3>
+      <p class="mt-2 text-sm leading-relaxed text-neutral-400">
+        Há uma instância pública, mantida pelo autor, para usar sem instalar nada. No
+        Claude (web ou desktop): Configurações, Conectores, adicionar conector
+        personalizado, e colar a URL abaixo.
+      </p>
+      <div class="mt-4 flex flex-col gap-4">
+        <CodeBlock code={CONNECTOR_URL} lang="text" caption="URL do conector" />
+        <CodeBlock code={claudeCode} lang="bash" caption="No Claude Code" />
+      </div>
+
+      <div class="mt-6 rounded-xl border border-amber-500/25 bg-amber-500/[0.04] p-4">
+        <p class="text-sm font-semibold uppercase tracking-wider text-amber-300">Antes de usar o conector</p>
+        <ul class="mt-3 grid gap-3 sm:grid-cols-2">
+          {
+            avisos.map((a) => (
+              <li class="text-sm leading-relaxed text-neutral-300">
+                <span class="block font-semibold text-white">{a.titulo}</span>
+                <span>{a.texto}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </article>
+
+    <div class="mt-6 grid gap-6 lg:grid-cols-2 lg:items-start">
       <article class="rounded-xl border border-neutral-800 bg-ink-800 p-5">
         <h3 class="font-mono text-base font-semibold text-emerald">stdio (local)</h3>
         <p class="mt-2 text-sm leading-relaxed text-neutral-400">
-          O padrão. O cliente sobe o processo na máquina de quem usa, do jeito dos
-          comandos abaixo. Nada precisa ficar exposto na rede.
+          O cliente sobe o processo na sua máquina, contra a sua cópia da base (passo a
+          passo abaixo). Nada fica exposto na rede, e os termos consultados não saem do
+          seu computador. Com o LLM no ar, o que não está no cache é classificado na
+          hora, sem ser gravado.
         </p>
       </article>
 
       <article class="flex flex-col gap-4 rounded-xl border border-neutral-800 bg-ink-800 p-5">
         <div>
-          <h3 class="font-mono text-base font-semibold text-emerald">streamable-http (conector)</h3>
+          <h3 class="font-mono text-base font-semibold text-emerald">streamable-http (o seu conector)</h3>
           <p class="mt-2 text-sm leading-relaxed text-neutral-400">
-            Vira um endpoint HTTP alcançável pela rede, que o Claude aceita como
-            custom connector. Uma instância serve vários usuários e busca as
-            atualizações. O tráfego do Claude chega dos IPs da Anthropic, então há
-            um teto global e um por origem para proteger a base.
+            Para hospedar a sua instância. O servidor escuta no loopback; expor é
+            papel de um proxy reverso com TLS ou de um túnel. Ele não chama o LLM nem
+            coleta: serve o cache que o sync publica. O tráfego do Claude chega dos IPs
+            da Anthropic, então há um teto global e um por origem.
           </p>
         </div>
         <CodeBlock code={connector} lang="bash" />

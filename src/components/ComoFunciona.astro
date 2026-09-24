@@ -3,22 +3,22 @@ const camadas = [
   {
     n: "01",
     titulo: "Dados",
-    texto: "Consulta às bases públicas de registro da Anvisa (medicamentos e dispositivos).",
+    texto: "Os arquivos abertos de registro da Anvisa (medicamentos e dispositivos), baixados pelo sync. A Anvisa republica diariamente (D-1).",
   },
   {
     n: "02",
     titulo: "Armazenamento",
-    texto: "Os dados coletados ficam em armazenamento local, prontos para consulta rápida.",
+    texto: "Uma base DuckDB em arquivo (~42 MB). O sync é upsert: registro que sai da publicação fica marcado como não visto na última coleta.",
   },
   {
     n: "03",
     titulo: "Classificação",
-    texto: "Um modelo de linguagem classifica, de forma heurística, se um dispositivo parece ser SaMD com IA.",
+    texto: "Um LLM local, compatível com a API da OpenAI, julga se um dispositivo usa IA. Quem grava os vereditos é a CLI; o servidor só lê.",
   },
   {
     n: "04",
     titulo: "Ferramentas MCP",
-    texto: "As consultas são expostas como tools MCP, que qualquer modelo compatível chama localmente.",
+    texto: "Duas tools MCP, por stdio na sua máquina ou por HTTP no modo conector.",
   },
 ];
 ---
@@ -60,8 +60,10 @@ const camadas = [
       </svg>
       <p class="text-sm leading-relaxed text-neutral-300">
         A classificação de SaMD com IA é <strong class="font-semibold text-white">heurística</strong>,
-        gerada por um modelo de linguagem. Ela ajuda a triagem, mas não é um fato
-        regulatório oficial e não substitui a consulta direta ao registro na Anvisa.
+        gerada por um modelo de linguagem lendo nome técnico, nome comercial e
+        fabricante (o registro não tem campo de descrição). Cada item traz confiança,
+        justificativa e origem do veredito. Ajuda a triagem, mas não é fato regulatório
+        e não substitui a consulta ao registro no portal da Anvisa.
       </p>
     </div>
   </div>

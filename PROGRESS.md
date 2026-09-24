@@ -3,15 +3,17 @@
 ## Objetivo
 Landing page estatica (Astro + Tailwind) para o projeto `anvisa-mcp` (servidor MCP
 de consulta regulatoria da Anvisa), tom anti-hype IA.med, publicada sob
-`https://mcp.iamed.cc/anvisa`. So apresenta e direciona pro GitHub, sem backend.
+`https://iamed.cc/mcps/anvisa`. Apresenta o conector hospedado e a instalacao
+local, sem backend.
 
 ## Decisoes (e por que)
-- **Dominio**: `mcp.iamed.cc/anvisa` (confirmado pelo usuario). Astro `site:
-  'https://mcp.iamed.cc'` + `base: '/anvisa'`. Canonical e OG absolutos nesse path.
+- **Dominio**: `iamed.cc/mcps/anvisa`. Astro `site: 'https://iamed.cc'` + `base:
+  '/mcps/anvisa'`. O antigo `mcp.iamed.cc` foi abandonado (DNS aponta para um
+  roteador sem rota) e nao deve aparecer em nenhum link.
 - **Fonte do projeto**: `anvisa-mcp` ainda NAO existe (usuario confirmou "ainda nao
   criei"). Conteudo construido a partir da spec do proprio prompt. Exemplos de
-  retorno das tools marcados como ilustrativos. Licenca MIT provisoria. Link do
-  GitHub aponta pra `github.com/fabianofilho/anvisa-mcp` (vai 404 ate o repo existir).
+  retorno das tools marcados como ilustrativos. Hoje o repo existe, e publico e
+  Apache-2.0; exemplos e assinaturas foram alinhados a v0.1.0 (branch alinhar-v0.1.0).
 - **Stack**: Astro 5 + @astrojs/tailwind 6 + Tailwind 3.4. Sem React/Vue. Icones em
   SVG inline (prompt permite, evita dep extra). Code highlight via `astro:components`
   Code (Shiki, build-time). Fonte: system stacks (sem web font, Lighthouse/CLS).
@@ -35,22 +37,18 @@ de consulta regulatoria da Anvisa), tom anti-hype IA.med, publicada sob
 
 ## Estado final (feito nesta sessao)
 - Repo publico no ar: https://github.com/fabianofilho/anvisa-mcp-landing (main).
-- Repo do projeto anvisa-mcp existe mas e PRIVADO -> botao "Ver no GitHub" 404 pra
-  visitante sem acesso ate ser tornado publico. Decisao do usuario.
-- Deploy Vercel NAO feito. Ao configurar: apontar dominio pra servir o dist sob
-  /anvisa (mcp.iamed.cc/anvisa) e conferir que /anvisa/og-image.png e /anvisa/
-  favicon.svg resolvem.
+- Repo do projeto anvisa-mcp e PUBLICO (Apache-2.0).
+- Publicacao: o dist e copiado para mcps/anvisa/ do repo Medicina-IA/
+  medicina-ia.github.io, cujo deploy na Vercel serve iamed.cc (ver README).
 - npm audit acusou vulnerabilidades em deps transitivas (dev/build, Astro/Vite);
   nao rodei `audit fix --force` (breaking). Reavaliar em upgrade do Astro.
-- Exemplos de retorno das tools sao ILUSTRATIVOS; reconciliar com o anvisa-mcp
-  real antes de divulgar a pagina.
+- Exemplos de retorno das tools sao saidas reais da v0.1.0 (24/09/2026).
 
 ## Proximo passo (quando for publicar de verdade)
-1. Tornar anvisa-mcp publico OU repensar o CTA se ficar privado.
-2. Ajustar exemplos das tools ao esquema real do anvisa-mcp.
-3. Deploy Vercel + apontar mcp.iamed.cc/anvisa.
+1. Merge da PR alinhar-v0.1.0 depois da PR finalizar-v0.1.0 do anvisa-mcp.
+2. Copiar o dist para medicina-ia.github.io/mcps/anvisa e publicar.
 
 ## Fora de escopo (e por que)
 - Criar o repo `anvisa-mcp` em si (usuario nao pediu; e outro projeto).
-- Configurar o dominio na Vercel (feito manualmente depois pelo usuario).
+- Pagina central iamed.cc/mcps (fica no repo do site).
 - Analytics.
