@@ -1,34 +1,72 @@
 ---
 import CodeBlock from "./CodeBlock.astro";
 
-const consultarSig = `consultar_status_medicamento(termo: str) -> dict`;
+const consultarSig = `consultar_status_medicamento(
+    termo: str,
+    limite: int = 20,  # 1 a 200
+) -> RespostaMedicamentos`;
 
 const consultarRetorno = `{
-  "termo": "dipirona monoidratada",
+  "termo_consultado": "1.1819.0006",
+  "fonte": "duckdb",
+  "coletado_em": "2026-09-24T03:22:04.857697",
+  "total": 1,
+  "retornados": 1,
+  "truncado": false,
   "resultados": [
     {
-      "produto": "DIPIRONA MONOIDRATADA",
-      "registro": "1.2345.6789",
-      "situacao": "válido",
-      "vencimento": "2028-05-31",
-      "empresa": "Laboratório Exemplo S.A."
+      "numero_registro": "118190006",
+      "nome_produto": "DELTALAB",
+      "principio_ativo": "deltametrina",
+      "empresa_detentora": "92265552000905 - MULTILAB INDUSTRIA E COMERCIO DE PRODUTOS FARMACEUTICOS LTDA",
+      "situacao": "Ativo",
+      "data_situacao": "2029-02-01",
+      "categoria": "Similar",
+      "visto_na_ultima_coleta": true
     }
   ],
-  "fonte": "Anvisa, consulta pública"
+  "aviso": null
 }`;
 
-const samdSig = `buscar_samd_recentes(dias: int = 30, com_ia: bool = True) -> list[dict]`;
+const samdSig = `buscar_samd_recentes(
+    dias: int = 90,              # 1 a 3650
+    apenas_com_ia: bool = True,
+    apenas_software: bool = True,
+    limite: int = 50,            # 1 a 200
+) -> RespostaSaMD`;
 
-const samdRetorno = `[
-  {
-    "produto": "Sistema de apoio a diagnóstico por imagem",
-    "registro": "8.0000.1111",
-    "publicado_em": "2026-09-02",
-    "ia_provavel": true,
-    "confianca": "média",
-    "observacao": "classificação heurística, confirmar no registro"
-  }
-]`;
+const samdRetorno = `{
+  "dias": 3650,
+  "apenas_com_ia": true,
+  "fonte": "duckdb",
+  "coletado_em": "2026-09-24T03:22:40.940760",
+  "total": 310,
+  "analisados": 200,
+  "retornados": 1,
+  "truncado": true,
+  "indeterminados": 158,
+  "resultados": [
+    {
+      "numero_registro": "80102513702",
+      "nome_produto": "CAD4TB",
+      "empresa_detentora": "VR MEDICAL IMPORTADORA E DISTRIBUIDORA DE PRODUTOS MÉDICOS LTDA",
+      "classe_risco": "III",
+      "situacao": "29/06/2036",
+      "validade_registro": "2036-06-29",
+      "data_registro": "2026-06-29",
+      "visto_na_ultima_coleta": true,
+      "classificacao": {
+        "usa_ia": true,
+        "confianca": 0.6,
+        "justificativa": "O nome 'CAD4TB' sugere uso de CAD (Computer-Aided Diagnosis) para tuberculose, e o fabricante 'DELFT AI B.V.' indica forte probabilidade de uso de IA, mas a documentação fornecida é insuficiente para confirmar o funcionamento técnico.",
+        "evidencia_confere": null,
+        "origem": "cache",
+        "heuristica": true
+      }
+    }
+  ],
+  "aviso": "A Anvisa não publica campo estruturado de uso de IA. A classificação abaixo é heurística (...)"
+}`;
 ---
 
 <section id="tools" class="border-b border-neutral-900">
@@ -40,8 +78,10 @@ const samdRetorno = `[
       Duas tools MCP expostas ao modelo
     </h2>
     <p class="mt-3 max-w-2xl text-neutral-400">
-      O modelo chama estas funções durante a conversa. Os retornos abaixo são
-      exemplos do formato; o esquema final segue a implementação do projeto.
+      O modelo chama estas funções durante a conversa. As assinaturas são as da
+      v0.1.0, e os retornos são saídas reais de 24/09/2026 (o de SaMD, cortado num
+      item). Toda resposta traz <code class="font-mono text-neutral-300">coletado_em</code>
+      e ganha aviso quando a última coleta passou de 48 horas.
     </p>
 
     <div class="mt-10 grid gap-6 lg:grid-cols-2">
@@ -52,12 +92,17 @@ const samdRetorno = `[
             consultar_status_medicamento
           </h3>
           <p class="mt-2 text-sm leading-relaxed text-neutral-400">
-            Consulta a situação de registro de um medicamento por nome ou número
-            de registro: se está válido, a validade e a empresa detentora.
+            Busca por trecho do nome comercial ou do princípio ativo (sem precisar de
+            acento) ou pelo número de registro, com ou sem pontos. Devolve situação
+            (<code class="font-mono">Ativo</code> ou <code class="font-mono">Inativo</code>,
+            como a Anvisa publica), vencimento do registro, empresa e categoria. Um
+            princípio ativo comum casa com centenas de registros ("dipirona" dá 557):
+            use <code class="font-mono">total</code>, não o tamanho da lista. Termo sem
+            correspondência devolve lista vazia.
           </p>
         </div>
         <CodeBlock code={consultarSig} lang="python" />
-        <CodeBlock code={consultarRetorno} lang="json" caption="Exemplo de retorno" />
+        <CodeBlock code={consultarRetorno} lang="json" caption="Saída real, busca por número de registro" />
       </article>
 
       <!-- Tool 2 -->
@@ -67,12 +112,19 @@ const samdRetorno = `[
             buscar_samd_recentes
           </h3>
           <p class="mt-2 text-sm leading-relaxed text-neutral-400">
-            Lista dispositivos (SaMD) publicados num período recente, sinalizando
-            os que provavelmente usam IA segundo a classificação heurística.
+            Lista dispositivos Classe III/IV registrados na janela, cada um com um
+            veredito heurístico sobre uso de IA: confiança, justificativa e
+            <code class="font-mono">origem</code> (<code class="font-mono">llm</code>,
+            <code class="font-mono">cache</code>, <code class="font-mono">nao_classificado</code>
+            ou <code class="font-mono">indisponivel</code>).
+            <code class="font-mono">nao_classificado</code> quer dizer "não se sabe", não
+            "sem IA", e <code class="font-mono">indeterminados</code> conta esses casos.
+            <code class="font-mono">apenas_software</code> filtra por palavra-chave e troca
+            recall por custo.
           </p>
         </div>
         <CodeBlock code={samdSig} lang="python" />
-        <CodeBlock code={samdRetorno} lang="json" caption="Exemplo de retorno" />
+        <CodeBlock code={samdRetorno} lang="json" caption="Trecho de saída real no conector (dias=3650, limite=200)" />
       </article>
     </div>
   </div>
