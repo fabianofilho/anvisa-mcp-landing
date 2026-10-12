@@ -8,7 +8,7 @@ const outros = FAMILY.filter((m) => m.slug !== SELF_SLUG);
   <!-- Familia de MCPs -->
   <div class="rounded-2xl border border-neutral-800 bg-ink-800 p-6">
     <p class="text-sm font-semibold text-white">Família de MCPs da IA.med</p>
-    <p class="mt-1 text-sm text-neutral-500">Outros servidores open source da mesma linha.</p>
+    <p class="mt-1 text-sm text-neutral-500">Outros servidores da mesma linha. Cinco dos sete são de código aberto; o ans-mcp e o raciocinio-br-mcp são privados (lido em 11/10/2026).</p>
     <ul class="mt-4 grid gap-3 sm:grid-cols-2">
       {
         outros.map((m) => (
@@ -52,6 +52,8 @@ const outros = FAMILY.filter((m) => m.slug !== SELF_SLUG);
 
   <p class="mt-8 border-t border-neutral-900 pt-6 text-xs text-neutral-600">
     &copy; {ano} IA.med. Consulte sempre o registro oficial na Anvisa; esta ferramenta não
-    substitui a fonte regulatória.
+    substitui a fonte regulatória. É ferramenta de pesquisa: não é dispositivo médico,
+    não é apoio à decisão clínica e não substitui o julgamento clínico. Os números desta
+    página foram lidos da base real ou de uma execução em 12/10/2026 e envelhecem.
   </p>
 </footer>

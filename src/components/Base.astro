@@ -1,0 +1,64 @@
+---
+const tabelas = [
+  { nome: "dispositivos_medicos", linhas: "101.082", desc: "Registros de dispositivo publicados pela agência" },
+  { nome: "medicamentos", linhas: "32.798", desc: "Registros de medicamento" },
+  { nome: "classificacoes_samd", linhas: "370", desc: "Vereditos de SaMD que a coleta já gravou" },
+];
+
+const limites = [
+  {
+    titulo: "Conferir a citação não pega erro de interpretação",
+    texto:
+      "A heurística de SaMD pode devolver uma citação real e contígua do registro e ainda assim classificar errado em cima dela.",
+  },
+  {
+    titulo: "A coluna de situação tem data vazando",
+    texto:
+      'Em dispositivos_medicos, o campo situacao traz "VIGENTE" em 83.971 linhas e datas como "29/06/2036" em outras (o exemplo de SaMD acima mostra um caso). Achado em 12/10/2026 e ainda não investigado: não se sabe se é a fonte ou o parser.',
+  },
+  {
+    titulo: "Um terço dos registros citados pelo TUSS não está aqui",
+    texto:
+      "Dos 560 registros de dispositivo que o TUSS cita, 368 constam desta base (lido em 12/10/2026). O motivo não está nos dados, então não conclua que foram cancelados.",
+  },
+];
+---
+
+<section id="base" class="border-b border-neutral-900">
+  <div class="mx-auto max-w-4xl px-6 py-20">
+    <p class="text-sm font-semibold uppercase tracking-wider text-emerald">
+      A base e os limites
+    </p>
+    <h2 class="mt-3 text-2xl font-bold text-white sm:text-3xl">
+      O que há na base, e o que ele não diz
+    </h2>
+    <p class="mt-3 max-w-2xl text-neutral-400">
+      Números lidos da base real em 12/10/2026 (arquivo DuckDB de 63 MB), com
+      113 testes automatizados na suíte. Os dados são cópia de dado público, com a
+      data da coleta em toda resposta. O LLM entra só na heurística de SaMD.
+    </p>
+
+    <div class="mt-10 grid gap-6 sm:grid-cols-3">
+      {
+        tabelas.map((t) => (
+          <div class="rounded-xl border border-neutral-800 bg-ink-800 p-5">
+            <h3 class="font-mono text-sm font-semibold text-emerald">{t.nome}</h3>
+            <p class="mt-2 text-2xl font-bold text-white">{t.linhas}</p>
+            <p class="mt-1 text-sm leading-relaxed text-neutral-400">{t.desc}</p>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="mt-10 grid gap-6 sm:grid-cols-3">
+      {
+        limites.map((p) => (
+          <div class="rounded-xl border border-neutral-800 bg-ink-800 p-5">
+            <h3 class="text-base font-semibold text-white">{p.titulo}</h3>
+            <p class="mt-2 text-sm leading-relaxed text-neutral-400">{p.texto}</p>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
