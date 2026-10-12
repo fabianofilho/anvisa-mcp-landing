@@ -2,7 +2,7 @@
 
 Landing page do [`anvisa-mcp`](https://github.com/fabianofilho/anvisa-mcp), um
 servidor MCP para consulta regulatória da Anvisa. Pode ser usado pelo conector
-hospedado (`https://mcp.tailf42a96.ts.net/anvisa/mcp`, sem garantia de
+hospedado (`https://debian-f.tailf42a96.ts.net/anvisa/mcp`, sem garantia de
 disponibilidade) ou instalado localmente. Um projeto [IA.med](https://iamed.cc).
 
 Página estática, sem backend e sem coleta de dados de visitante.
@@ -51,6 +51,8 @@ cp -r dist ../medicina-ia.github.io/mcps/anvisa
 - As assinaturas e os exemplos de retorno das tools são os da v0.1.0 do
   `anvisa-mcp` (`RespostaMedicamentos`, `RespostaSaMD`), tirados de saídas reais
   de 24/09/2026.
+- Números da base (63 MB; 101.082 dispositivos, 32.798 medicamentos, 370 vereditos de SaMD) e
+  113 testes: lidos em 12/10/2026, conforme o estado da família de MCPs IA.med nessa data.
 - A classificação de SaMD com IA é heurística, não um fato regulatório oficial.
 
 ## Licença

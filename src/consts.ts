@@ -8,7 +8,7 @@ export const PROJECT = "anvisa-mcp";
 // Conector hospedado oficial (Tailscale Funnel, sem garantia de uptime).
 export const CONNECTOR_URL = "https://debian-f.tailf42a96.ts.net/anvisa/mcp";
 
-// Familia de MCPs open source da IA.med. SELF_SLUG marca o atual (some do rodape).
+// Familia de MCPs da IA.med (5 de 7 sao open source; ans e raciocinio-br sao privados). SELF_SLUG marca o atual (some do rodape).
 export const SELF_SLUG = "anvisa";
 export const FAMILY = [
   { slug: "anvisa", nome: "anvisa-mcp", url: "https://iamed.cc/mcps/anvisa", desc: "Registro sanitário da Anvisa" },
