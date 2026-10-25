@@ -2,7 +2,7 @@
 
 Landing page do [`anvisa-mcp`](https://github.com/fabianofilho/anvisa-mcp), um
 servidor MCP para consulta regulatória da Anvisa. Pode ser usado pelo conector
-hospedado (`https://debian-f.tailf42a96.ts.net/anvisa/mcp`, sem garantia de
+hospedado (`https://mcp.iamed.cc/anvisa/mcp`, sem garantia de
 disponibilidade) ou instalado localmente. Um projeto [IA.med](https://iamed.cc).
 
 Página estática, sem backend e sem coleta de dados de visitante.

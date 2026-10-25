@@ -6,7 +6,7 @@ export const LICENSE = "Apache-2.0";
 export const PROJECT = "anvisa-mcp";
 
 // Conector hospedado oficial (Tailscale Funnel, sem garantia de uptime).
-export const CONNECTOR_URL = "https://debian-f.tailf42a96.ts.net/anvisa/mcp";
+export const CONNECTOR_URL = "https://mcp.iamed.cc/anvisa/mcp";
 
 // Familia de MCPs da IA.med (6 de 9 sao open source; ans, raciocinio-br e omnisus-ask sao privados; omnisus sem landing). SELF_SLUG marca o atual (some do rodape).
 export const SELF_SLUG = "anvisa";
